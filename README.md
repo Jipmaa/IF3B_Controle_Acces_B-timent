@@ -1,7 +1,7 @@
-### Projet IF3B
+# Projet IF3B
 ## Contrôle d'accès à un bâtiment
 
-# Équipements utilisés :
+### Équipements utilisés :
 - Module RFID
 - Keypad
 - Serrure à solénoide
