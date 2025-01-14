@@ -70,10 +70,10 @@ Pour répondre à ces défis, **notre projet vise à concevoir une solution inno
 - DIN : D33 (modulable)
 
 **Buzzer** :
-I/O : D13 (modulable)
+- I/O : D13 (modulable)
 
 **Led rouge** :
-D13 (modulable)
+- D13 (modulable)
 
 **VCC / GND** :
 Tous les pins VCC (pour le courant) et GND (pour la masse), sont à brancher sur une breadboard
