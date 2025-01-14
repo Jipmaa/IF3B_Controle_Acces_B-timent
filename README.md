@@ -82,6 +82,6 @@ Tous les pins VCC (pour le courant) et GND (pour la masse), sont à brancher sur
 
 ### Câblage
 <img width="651" alt="Cablage" src="https://github.com/user-attachments/assets/30147bf9-b54b-415d-bfe6-369ea2827b7c" />
-
+(seul la serrure est manquante)
 ### Rendu final
 https://github.com/Jipmaa/IF3B_Controle_Acces_Batiment/tree/e7f2aa74cef77e2d99e59e1e05c4c83b59b73495/Rendu
