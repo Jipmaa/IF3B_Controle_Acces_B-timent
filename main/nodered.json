@@ -1,0 +1,1718 @@
+[
+    {
+        "id": "da56d468b81dc545",
+        "type": "group",
+        "z": "5a1ac741c92d4ba0",
+        "name": "Graphiques",
+        "style": {
+            "stroke": "#000000",
+            "fill": "#ff7f7f",
+            "label": true,
+            "fill-opacity": "0.3",
+            "color": "#000000"
+        },
+        "nodes": [
+            "677518904fe21868",
+            "d45915c2b0196980",
+            "976f220ba67ba182",
+            "fbe4b9ac7b410104",
+            "e576fcc9dd7c046b",
+            "f0b52a982f8f539c",
+            "03071b7fe7d8faf9",
+            "056f903268c88a71",
+            "224deb7d4204b6af",
+            "689f431631f2ea96",
+            "96f5b3c56685d4a5",
+            "b21da58b93f0ae5f",
+            "92f9517109bf6e2c",
+            "b2fe85b255e9a2ec",
+            "25da714ec699050b",
+            "5df167af41712e95",
+            "67295e2c7e93d78d",
+            "fe5bbcc8ead25ec1",
+            "fe19db71711c1140",
+            "594b9cc5cbedb276",
+            "e2827a5c41c6ff0f",
+            "f0ce6556060967de",
+            "0c10f9adb185836e",
+            "33b572e0247bcf8f",
+            "79fc8fa24146e650"
+        ],
+        "x": 694,
+        "y": 19,
+        "w": 1172,
+        "h": 402
+    },
+    {
+        "id": "677518904fe21868",
+        "type": "inject",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "inject",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 790,
+        "y": 240,
+        "wires": [
+            [
+                "d45915c2b0196980",
+                "f0b52a982f8f539c",
+                "689f431631f2ea96",
+                "b2fe85b255e9a2ec",
+                "33b572e0247bcf8f",
+                "79fc8fa24146e650"
+            ]
+        ]
+    },
+    {
+        "id": "d45915c2b0196980",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "ouvertureTypeDate",
+        "func": "msg.topic = 'SELECT date_ouverture, COUNT(*) as nb_ouverture FROM ouverture WHERE date_ouverture >= DATE(NOW()) - INTERVAL 7 DAY GROUP BY date_ouverture ORDER BY date_ouverture;';\nmsg.payload = {};  // Pas d'arguments supplémentaires pour cette requête\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 990,
+        "y": 60,
+        "wires": [
+            [
+                "976f220ba67ba182"
+            ]
+        ]
+    },
+    {
+        "id": "976f220ba67ba182",
+        "type": "Stackhero-MySQL",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "server": "c6adeef289b3465a",
+        "name": "",
+        "x": 1200,
+        "y": 60,
+        "wires": [
+            [
+                "fbe4b9ac7b410104"
+            ]
+        ]
+    },
+    {
+        "id": "fbe4b9ac7b410104",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "recuperationDataOpen7J-All",
+        "func": "var payload = msg.payload;\nvar labels = [];\nvar data = [];\n\nif (Array.isArray(payload)) {\n    for (var i = 0; i < payload.length; i++) {\n        if (payload[i] && payload[i].hasOwnProperty('date_ouverture') && payload[i].hasOwnProperty('nb_ouverture')) {\n            var rawDate = payload[i].date_ouverture;\n            var formattedDate = new Date(rawDate).toISOString().split('T')[0];\n            labels.push(formattedDate);\n            data.push(payload[i].nb_ouverture);\n        }\n    }\n}\n\nvar chart = {};\nchart.labels = labels;\nchart.series = ['Ouverture'];\nchart.data = [data];\n\nmsg.payload = [chart];\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1460,
+        "y": 60,
+        "wires": [
+            [
+                "e576fcc9dd7c046b"
+            ]
+        ]
+    },
+    {
+        "id": "e576fcc9dd7c046b",
+        "type": "ui_chart",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "Graphique Entrée",
+        "group": "d81d91a64f89b9e6",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "Graphique Entrée",
+        "chartType": "bar",
+        "legend": "true",
+        "xformat": "Y-M-D",
+        "interpolate": "linear",
+        "nodata": "No Data",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": true,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1750,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f0b52a982f8f539c",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "ouvertureTypeDate",
+        "func": "msg.topic = 'SELECT date_ouverture, COUNT(*) as nb_ouverture FROM ouverture WHERE date_ouverture >= DATE(NOW()) - INTERVAL 30 DAY GROUP BY date_ouverture ORDER BY date_ouverture;';\nmsg.payload = {};  // Pas d'arguments supplémentaires pour cette requête\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 990,
+        "y": 120,
+        "wires": [
+            [
+                "03071b7fe7d8faf9"
+            ]
+        ]
+    },
+    {
+        "id": "03071b7fe7d8faf9",
+        "type": "Stackhero-MySQL",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "server": "c6adeef289b3465a",
+        "name": "",
+        "x": 1200,
+        "y": 120,
+        "wires": [
+            [
+                "056f903268c88a71"
+            ]
+        ]
+    },
+    {
+        "id": "056f903268c88a71",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "recuperationDataOpen1M-All",
+        "func": "var payload = msg.payload;\nvar labels = [];\nvar data = [];\n\nif (Array.isArray(payload)) {\n    for (var i = 0; i < payload.length; i++) {\n        if (payload[i] && payload[i].hasOwnProperty('date_ouverture') && payload[i].hasOwnProperty('nb_ouverture')) {\n            var rawDate = payload[i].date_ouverture;\n            var formattedDate = new Date(rawDate).toISOString().split('T')[0];\n            labels.push(formattedDate);\n            data.push(payload[i].nb_ouverture);\n        }\n    }\n}\n\nvar chart = {};\nchart.labels = labels;\nchart.series = ['Ouverture'];\nchart.data = [data];\n\nmsg.payload = [chart];\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1460,
+        "y": 120,
+        "wires": [
+            [
+                "224deb7d4204b6af"
+            ]
+        ]
+    },
+    {
+        "id": "224deb7d4204b6af",
+        "type": "ui_chart",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "Graphique Entrée",
+        "group": "d81d91a64f89b9e6",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "Graphique Entrée",
+        "chartType": "bar",
+        "legend": "true",
+        "xformat": "Y-M-D",
+        "interpolate": "linear",
+        "nodata": "No Data",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": true,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1750,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "689f431631f2ea96",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "ouvertureTypeDate",
+        "func": "msg.topic = 'SELECT date_ouverture, COUNT(*) as nb_ouverture FROM ouverture WHERE date_ouverture >= DATE(NOW()) - INTERVAL 365 DAY GROUP BY date_ouverture ORDER BY date_ouverture;';\nmsg.payload = {};  // Pas d'arguments supplémentaires pour cette requête\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 990,
+        "y": 180,
+        "wires": [
+            [
+                "96f5b3c56685d4a5"
+            ]
+        ]
+    },
+    {
+        "id": "96f5b3c56685d4a5",
+        "type": "Stackhero-MySQL",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "server": "c6adeef289b3465a",
+        "name": "",
+        "x": 1200,
+        "y": 180,
+        "wires": [
+            [
+                "b21da58b93f0ae5f"
+            ]
+        ]
+    },
+    {
+        "id": "b21da58b93f0ae5f",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "recuperationDataOpen1Y-All",
+        "func": "var payload = msg.payload;\nvar labels = [];\nvar data = [];\n\nif (Array.isArray(payload)) {\n    for (var i = 0; i < payload.length; i++) {\n        if (payload[i] && payload[i].hasOwnProperty('date_ouverture') && payload[i].hasOwnProperty('nb_ouverture')) {\n            var rawDate = payload[i].date_ouverture;\n            var formattedDate = new Date(rawDate).toISOString().split('T')[0];\n            labels.push(formattedDate);\n            data.push(payload[i].nb_ouverture);\n        }\n    }\n}\n\nvar chart = {};\nchart.labels = labels;\nchart.series = ['Ouverture'];\nchart.data = [data];\n\nmsg.payload = [chart];\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1460,
+        "y": 180,
+        "wires": [
+            [
+                "92f9517109bf6e2c"
+            ]
+        ]
+    },
+    {
+        "id": "92f9517109bf6e2c",
+        "type": "ui_chart",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "Graphique Entrée",
+        "group": "d81d91a64f89b9e6",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Graphique Entrée",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "Y-M-D",
+        "interpolate": "linear",
+        "nodata": "No Data",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1750,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b2fe85b255e9a2ec",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "erreurTypeDate",
+        "func": "msg.topic = 'SELECT erreur_nombre, COUNT(*) as nb_ouverture FROM erreur WHERE erreur_nombre >= DATE(NOW()) - INTERVAL 7 DAY GROUP BY erreur_nombre ORDER BY erreur_nombre;';\nmsg.payload = {};  // Pas d'arguments supplémentaires pour cette requête\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 980,
+        "y": 260,
+        "wires": [
+            [
+                "25da714ec699050b"
+            ]
+        ]
+    },
+    {
+        "id": "25da714ec699050b",
+        "type": "Stackhero-MySQL",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "server": "c6adeef289b3465a",
+        "name": "",
+        "x": 1200,
+        "y": 260,
+        "wires": [
+            [
+                "5df167af41712e95"
+            ]
+        ]
+    },
+    {
+        "id": "5df167af41712e95",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "recuperationDataErreur7J-All",
+        "func": "var payload = msg.payload;\nvar labels = [];\nvar data = [];\n\nif (Array.isArray(payload)) {\n    for (var i = 0; i < payload.length; i++) {\n        if (payload[i] && payload[i].hasOwnProperty('erreur_nombre') && payload[i].hasOwnProperty('nb_ouverture')) {\n            var rawDate = payload[i].erreur_nombre;\n            var formattedDate = new Date(rawDate).toISOString().split('T')[0];\n            labels.push(formattedDate);\n            data.push(payload[i].nb_ouverture);\n        }\n    }\n}\n\nvar chart = {};\nchart.labels = labels;\nchart.series = ['Erreur'];\nchart.data = [data];\n\nmsg.payload = [chart];\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1460,
+        "y": 260,
+        "wires": [
+            [
+                "67295e2c7e93d78d"
+            ]
+        ]
+    },
+    {
+        "id": "67295e2c7e93d78d",
+        "type": "ui_chart",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "Graphique Erreur",
+        "group": "1372c8a0dbed6ce5",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "Graphique Erreur",
+        "chartType": "bar",
+        "legend": "false",
+        "xformat": "Y-M-D",
+        "interpolate": "linear",
+        "nodata": "No Data",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": true,
+        "useUTC": false,
+        "colors": [
+            "#ff7f0e",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1750,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fe5bbcc8ead25ec1",
+        "type": "Stackhero-MySQL",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "server": "c6adeef289b3465a",
+        "name": "",
+        "x": 1200,
+        "y": 320,
+        "wires": [
+            [
+                "fe19db71711c1140"
+            ]
+        ]
+    },
+    {
+        "id": "fe19db71711c1140",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "recuperationDataErreur1M-All",
+        "func": "var payload = msg.payload;\nvar labels = [];\nvar data = [];\n\nif (Array.isArray(payload)) {\n    for (var i = 0; i < payload.length; i++) {\n        if (payload[i] && payload[i].hasOwnProperty('erreur_nombre') && payload[i].hasOwnProperty('nb_ouverture')) {\n            var rawDate = payload[i].erreur_nombre;\n            var formattedDate = new Date(rawDate).toISOString().split('T')[0];\n            labels.push(formattedDate);\n            data.push(payload[i].nb_ouverture);\n        }\n    }\n}\n\nvar chart = {};\nchart.labels = labels;\nchart.series = ['Erreur'];\nchart.data = [data];\n\nmsg.payload = [chart];\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1470,
+        "y": 320,
+        "wires": [
+            [
+                "594b9cc5cbedb276"
+            ]
+        ]
+    },
+    {
+        "id": "594b9cc5cbedb276",
+        "type": "ui_chart",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "Graphique Erreur",
+        "group": "1372c8a0dbed6ce5",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "label": "Graphique Erreur",
+        "chartType": "bar",
+        "legend": "true",
+        "xformat": "Y-M-D",
+        "interpolate": "linear",
+        "nodata": "No Data",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": true,
+        "useUTC": false,
+        "colors": [
+            "#ff7f0e",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1750,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e2827a5c41c6ff0f",
+        "type": "Stackhero-MySQL",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "server": "c6adeef289b3465a",
+        "name": "",
+        "x": 1200,
+        "y": 380,
+        "wires": [
+            [
+                "f0ce6556060967de"
+            ]
+        ]
+    },
+    {
+        "id": "f0ce6556060967de",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "recuperationDataErreur1Y-All",
+        "func": "var payload = msg.payload;\nvar labels = [];\nvar data = [];\n\nif (Array.isArray(payload)) {\n    for (var i = 0; i < payload.length; i++) {\n        if (payload[i] && payload[i].hasOwnProperty('erreur_nombre') && payload[i].hasOwnProperty('nb_ouverture')) {\n            var rawDate = payload[i].erreur_nombre;\n            var formattedDate = new Date(rawDate).toISOString().split('T')[0];\n            labels.push(formattedDate);\n            data.push(payload[i].nb_ouverture);\n        }\n    }\n}\n\nvar chart = {};\nchart.labels = labels;\nchart.series = ['Erreur'];\nchart.data = [data];\n\nmsg.payload = [chart];\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1460,
+        "y": 380,
+        "wires": [
+            [
+                "0c10f9adb185836e"
+            ]
+        ]
+    },
+    {
+        "id": "0c10f9adb185836e",
+        "type": "ui_chart",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "Graphique Erreur",
+        "group": "1372c8a0dbed6ce5",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Graphique Erreur",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "Y-M-D",
+        "interpolate": "linear",
+        "nodata": "No Data",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#ff7f0e",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1750,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "33b572e0247bcf8f",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "erreurTypeDate",
+        "func": "msg.topic = 'SELECT erreur_nombre, COUNT(*) as nb_ouverture FROM erreur WHERE erreur_nombre >= DATE(NOW()) - INTERVAL 30 DAY GROUP BY erreur_nombre ORDER BY erreur_nombre;';\nmsg.payload = {};  // Pas d'arguments supplémentaires pour cette requête\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 980,
+        "y": 320,
+        "wires": [
+            [
+                "fe5bbcc8ead25ec1"
+            ]
+        ]
+    },
+    {
+        "id": "79fc8fa24146e650",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "da56d468b81dc545",
+        "name": "erreurTypeDate",
+        "func": "msg.topic = 'SELECT erreur_nombre, COUNT(*) as nb_ouverture FROM erreur WHERE erreur_nombre >= DATE(NOW()) - INTERVAL 365 DAY GROUP BY erreur_nombre ORDER BY erreur_nombre;';\nmsg.payload = {};  // Pas d'arguments supplémentaires pour cette requête\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 980,
+        "y": 380,
+        "wires": [
+            [
+                "e2827a5c41c6ff0f"
+            ]
+        ]
+    },
+    {
+        "id": "c6adeef289b3465a",
+        "type": "Stackhero-MySQL-Server",
+        "name": "maison",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "tls": false,
+        "database": "maison"
+    },
+    {
+        "id": "d81d91a64f89b9e6",
+        "type": "ui_group",
+        "name": "Data Ouverture Porte Par Tous",
+        "tab": "cce97331f75c10a4",
+        "order": 1,
+        "disp": true,
+        "width": "10",
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "1372c8a0dbed6ce5",
+        "type": "ui_group",
+        "name": "Erreur",
+        "tab": "cce97331f75c10a4",
+        "order": 2,
+        "disp": true,
+        "width": "10",
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "cce97331f75c10a4",
+        "type": "ui_tab",
+        "name": "Variation open data de :",
+        "icon": "dashboard",
+        "order": 2,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "e0952edd58805fa8",
+        "type": "group",
+        "z": "5a1ac741c92d4ba0",
+        "name": "Insertion Data SQL",
+        "style": {
+            "stroke": "#000000",
+            "fill": "#ffcf3f",
+            "fill-opacity": "0.3",
+            "label": true,
+            "color": "#000000"
+        },
+        "nodes": [
+            "a7dbd4cde338cb7a",
+            "b1a99e30f88e28c9",
+            "a2b6e8c49c9ffd48",
+            "24413c5f5d77a319",
+            "43bf449c0f3e547f",
+            "3176c57095fad71e"
+        ],
+        "x": 694,
+        "y": 539,
+        "w": 552,
+        "h": 142
+    },
+    {
+        "id": "a7dbd4cde338cb7a",
+        "type": "mqtt in",
+        "z": "5a1ac741c92d4ba0",
+        "g": "e0952edd58805fa8",
+        "name": "ESP32 open",
+        "topic": "esp32/maison/ouverture",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "5719589c05b2e707",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 790,
+        "y": 580,
+        "wires": [
+            [
+                "b1a99e30f88e28c9"
+            ]
+        ]
+    },
+    {
+        "id": "b1a99e30f88e28c9",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "e0952edd58805fa8",
+        "name": "injectionData",
+        "func": "const identifiant = msg.payload;\n\nmsg.topic = 'INSERT INTO ouverture (type) VALUES (\"' + identifiant + '\")';\nmsg.payload = {}; // Pas de paramètres supplémentaires nécessaires ici\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 990,
+        "y": 580,
+        "wires": [
+            [
+                "a2b6e8c49c9ffd48"
+            ]
+        ]
+    },
+    {
+        "id": "a2b6e8c49c9ffd48",
+        "type": "Stackhero-MySQL",
+        "z": "5a1ac741c92d4ba0",
+        "g": "e0952edd58805fa8",
+        "server": "c6adeef289b3465a",
+        "name": "",
+        "x": 1160,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "24413c5f5d77a319",
+        "type": "mqtt in",
+        "z": "5a1ac741c92d4ba0",
+        "g": "e0952edd58805fa8",
+        "name": "ESP32 erreur",
+        "topic": "esp32/maison/erreur",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "5719589c05b2e707",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 790,
+        "y": 640,
+        "wires": [
+            [
+                "43bf449c0f3e547f"
+            ]
+        ]
+    },
+    {
+        "id": "43bf449c0f3e547f",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "e0952edd58805fa8",
+        "name": "injectionData",
+        "func": "msg.topic = 'INSERT INTO erreur VALUES ()';\nmsg.payload = {}; // Pas de paramètres supplémentaires nécessaires ici\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 990,
+        "y": 640,
+        "wires": [
+            [
+                "3176c57095fad71e"
+            ]
+        ]
+    },
+    {
+        "id": "3176c57095fad71e",
+        "type": "Stackhero-MySQL",
+        "z": "5a1ac741c92d4ba0",
+        "g": "e0952edd58805fa8",
+        "server": "c6adeef289b3465a",
+        "name": "",
+        "x": 1160,
+        "y": 640,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5719589c05b2e707",
+        "type": "mqtt-broker",
+        "name": "UTBM",
+        "broker": "mqtt.ci-ciad.utbm.fr",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "5",
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "ce88facb22c98b94",
+        "type": "group",
+        "z": "5a1ac741c92d4ba0",
+        "name": "Contrôle à Distance",
+        "style": {
+            "stroke": "#000000",
+            "fill": "#c8e7a7",
+            "fill-opacity": "0.3",
+            "label": true,
+            "color": "#000000"
+        },
+        "nodes": [
+            "b01b2b8ee87c6c21",
+            "769ee934956f28d4",
+            "7f55da1a51ebd1b2",
+            "52653e4f3fbbb117",
+            "135a5f9bde9d7de2",
+            "b4002b33785ac5d3",
+            "60ac041e84601922",
+            "adcb049d3ac30dcb",
+            "244011f4bb6da054",
+            "c3e1bc67388a0d7c",
+            "6fa1bb5285576e08",
+            "103f6b27dc95d6ff",
+            "b2ad4e00da57dc7d",
+            "de4aefe40f436348",
+            "9b7aeb867fd40810",
+            "756eebf6cc75c8d4",
+            "492e0620fc08fc16",
+            "ab095cd81c9b6644",
+            "42250b238229f362",
+            "be01b525df47d247"
+        ],
+        "x": 114,
+        "y": 19,
+        "w": 552,
+        "h": 642
+    },
+    {
+        "id": "b01b2b8ee87c6c21",
+        "type": "ui_button",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "group": "25a4620d8864a509",
+        "order": 2,
+        "width": 4,
+        "height": 1,
+        "passthru": false,
+        "label": "Ouverture Porte",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "onDoor",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 220,
+        "y": 300,
+        "wires": [
+            [
+                "52653e4f3fbbb117"
+            ]
+        ]
+    },
+    {
+        "id": "769ee934956f28d4",
+        "type": "mqtt out",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "topic": "esp32/maison/buzzerHz",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5719589c05b2e707",
+        "x": 530,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "7f55da1a51ebd1b2",
+        "type": "mqtt out",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "topic": "esp32/maison/ledStickRed",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5719589c05b2e707",
+        "x": 520,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "52653e4f3fbbb117",
+        "type": "mqtt out",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "topic": "esp32/maison/door",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5719589c05b2e707",
+        "x": 550,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "135a5f9bde9d7de2",
+        "type": "ui_slider",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "Red",
+        "label": "Rouge :",
+        "tooltip": "",
+        "group": "371609fd7479e470",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "end",
+        "topic": "topic",
+        "topicType": "msg",
+        "min": 0,
+        "max": "255",
+        "step": 1,
+        "className": "",
+        "x": 190,
+        "y": 420,
+        "wires": [
+            [
+                "7f55da1a51ebd1b2"
+            ]
+        ]
+    },
+    {
+        "id": "b4002b33785ac5d3",
+        "type": "ui_slider",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "Green",
+        "label": "Vert : ",
+        "tooltip": "",
+        "group": "371609fd7479e470",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "end",
+        "topic": "topic",
+        "topicType": "msg",
+        "min": 0,
+        "max": "255",
+        "step": 1,
+        "className": "",
+        "x": 190,
+        "y": 460,
+        "wires": [
+            [
+                "244011f4bb6da054"
+            ]
+        ]
+    },
+    {
+        "id": "60ac041e84601922",
+        "type": "ui_slider",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "Blue",
+        "label": "Bleu : ",
+        "tooltip": "",
+        "group": "371609fd7479e470",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "end",
+        "topic": "topic",
+        "topicType": "msg",
+        "min": 0,
+        "max": "255",
+        "step": 1,
+        "className": "",
+        "x": 190,
+        "y": 500,
+        "wires": [
+            [
+                "c3e1bc67388a0d7c"
+            ]
+        ]
+    },
+    {
+        "id": "adcb049d3ac30dcb",
+        "type": "ui_button",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "group": "25a4620d8864a509",
+        "order": 6,
+        "width": 4,
+        "height": 1,
+        "passthru": false,
+        "label": "Fermeture Porte",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "offDoor",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 220,
+        "y": 360,
+        "wires": [
+            [
+                "52653e4f3fbbb117"
+            ]
+        ]
+    },
+    {
+        "id": "244011f4bb6da054",
+        "type": "mqtt out",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "topic": "esp32/maison/ledStickGreen",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5719589c05b2e707",
+        "x": 520,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "c3e1bc67388a0d7c",
+        "type": "mqtt out",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "topic": "esp32/maison/ledStickBlue",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5719589c05b2e707",
+        "x": 520,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "6fa1bb5285576e08",
+        "type": "ui_button",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "group": "371609fd7479e470",
+        "order": 2,
+        "width": 4,
+        "height": 1,
+        "passthru": false,
+        "label": "Rainbow",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "rainbow",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 200,
+        "y": 60,
+        "wires": [
+            [
+                "103f6b27dc95d6ff"
+            ]
+        ]
+    },
+    {
+        "id": "103f6b27dc95d6ff",
+        "type": "mqtt out",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "topic": "esp32/maison/ledStickRainbow",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5719589c05b2e707",
+        "x": 510,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "b2ad4e00da57dc7d",
+        "type": "ui_text_input",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "label": "Texte à afficher :",
+        "tooltip": "",
+        "group": "ac3fe33b83ae731c",
+        "order": 7,
+        "width": 4,
+        "height": 1,
+        "passthru": true,
+        "mode": "text",
+        "delay": 300,
+        "topic": "topic",
+        "sendOnBlur": true,
+        "className": "",
+        "topicType": "msg",
+        "x": 220,
+        "y": 120,
+        "wires": [
+            [
+                "de4aefe40f436348"
+            ]
+        ]
+    },
+    {
+        "id": "de4aefe40f436348",
+        "type": "mqtt out",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "topic": "esp32/maison/ecran",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5719589c05b2e707",
+        "x": 540,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "9b7aeb867fd40810",
+        "type": "ui_button",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "group": "ac3fe33b83ae731c",
+        "order": 2,
+        "width": 4,
+        "height": 1,
+        "passthru": false,
+        "label": "Erase",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "EraseAll",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 190,
+        "y": 180,
+        "wires": [
+            [
+                "de4aefe40f436348"
+            ]
+        ]
+    },
+    {
+        "id": "756eebf6cc75c8d4",
+        "type": "ui_slider",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "label": "Taille affichage",
+        "tooltip": "",
+        "group": "ac3fe33b83ae731c",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "all",
+        "topic": "topic",
+        "topicType": "msg",
+        "min": "1",
+        "max": "8",
+        "step": "1",
+        "className": "",
+        "x": 220,
+        "y": 240,
+        "wires": [
+            [
+                "492e0620fc08fc16"
+            ]
+        ]
+    },
+    {
+        "id": "492e0620fc08fc16",
+        "type": "mqtt out",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "topic": "esp32/maison/ecran2",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5719589c05b2e707",
+        "x": 540,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "ab095cd81c9b6644",
+        "type": "mqtt out",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "topic": "esp32/maison/buzzerTime",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "5719589c05b2e707",
+        "x": 520,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "42250b238229f362",
+        "type": "ui_slider",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "label": "Fréquence",
+        "tooltip": "",
+        "group": "24a5664876c2b1b7",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "end",
+        "topic": "topic",
+        "topicType": "msg",
+        "min": "100",
+        "max": "12000",
+        "step": "10",
+        "className": "",
+        "x": 210,
+        "y": 580,
+        "wires": [
+            [
+                "769ee934956f28d4"
+            ]
+        ]
+    },
+    {
+        "id": "be01b525df47d247",
+        "type": "ui_slider",
+        "z": "5a1ac741c92d4ba0",
+        "g": "ce88facb22c98b94",
+        "name": "",
+        "label": "Durée (ms)",
+        "tooltip": "",
+        "group": "24a5664876c2b1b7",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "end",
+        "topic": "topic",
+        "topicType": "msg",
+        "min": "100",
+        "max": "5000",
+        "step": "10",
+        "className": "",
+        "x": 210,
+        "y": 620,
+        "wires": [
+            [
+                "ab095cd81c9b6644"
+            ]
+        ]
+    },
+    {
+        "id": "25a4620d8864a509",
+        "type": "ui_group",
+        "name": "Porte",
+        "tab": "08fe60cc4d10590e",
+        "order": 2,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "371609fd7479e470",
+        "type": "ui_group",
+        "name": "LedStick",
+        "tab": "08fe60cc4d10590e",
+        "order": 4,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "ac3fe33b83ae731c",
+        "type": "ui_group",
+        "name": "Ecran",
+        "tab": "08fe60cc4d10590e",
+        "order": 5,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "24a5664876c2b1b7",
+        "type": "ui_group",
+        "name": "Buzzer",
+        "tab": "08fe60cc4d10590e",
+        "order": 5,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "08fe60cc4d10590e",
+        "type": "ui_tab",
+        "name": "Projet Maison",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "df14c478fd8641c4",
+        "type": "group",
+        "z": "5a1ac741c92d4ba0",
+        "name": "Récupération Data SQL",
+        "style": {
+            "stroke": "#000000",
+            "fill": "#ffff7f",
+            "fill-opacity": "0.3",
+            "label": true,
+            "color": "#000000"
+        },
+        "nodes": [
+            "f56813ec4438bfeb",
+            "5b972d0a5ff6866c",
+            "15b19c46d151128e",
+            "bbd6b82893e75d17",
+            "c5ddc8e3f35c6e07"
+        ],
+        "x": 694,
+        "y": 439,
+        "w": 1112,
+        "h": 82
+    },
+    {
+        "id": "f56813ec4438bfeb",
+        "type": "inject",
+        "z": "5a1ac741c92d4ba0",
+        "g": "df14c478fd8641c4",
+        "name": "Last Employee Inject",
+        "props": [],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 840,
+        "y": 480,
+        "wires": [
+            [
+                "5b972d0a5ff6866c"
+            ]
+        ]
+    },
+    {
+        "id": "5b972d0a5ff6866c",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "df14c478fd8641c4",
+        "name": "ouvertureTypeDate",
+        "func": "msg.topic = 'SELECT date_ouverture FROM ouverture WHERE type = 2 ORDER BY date_ouverture DESC LIMIT 1;';\nmsg.payload = {};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1070,
+        "y": 480,
+        "wires": [
+            [
+                "15b19c46d151128e"
+            ]
+        ]
+    },
+    {
+        "id": "15b19c46d151128e",
+        "type": "Stackhero-MySQL",
+        "z": "5a1ac741c92d4ba0",
+        "g": "df14c478fd8641c4",
+        "server": "c6adeef289b3465a",
+        "name": "",
+        "x": 1260,
+        "y": 480,
+        "wires": [
+            [
+                "c5ddc8e3f35c6e07"
+            ]
+        ]
+    },
+    {
+        "id": "bbd6b82893e75d17",
+        "type": "ui_text",
+        "z": "5a1ac741c92d4ba0",
+        "g": "df14c478fd8641c4",
+        "group": "c9339c372dd7589f",
+        "order": 1,
+        "width": 6,
+        "height": 1,
+        "name": "Dernière visite value",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1680,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "c5ddc8e3f35c6e07",
+        "type": "function",
+        "z": "5a1ac741c92d4ba0",
+        "g": "df14c478fd8641c4",
+        "name": "function formatage",
+        "func": "var payload = msg.payload;\n\nif (Array.isArray(payload) && payload.length > 0 && payload[0].hasOwnProperty('date_ouverture')) {\n    var rawDate = payload[0].date_ouverture;\n    var formattedDate = new Date(rawDate).toISOString().split('T')[0];\n    msg.payload = formattedDate;\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1450,
+        "y": 480,
+        "wires": [
+            [
+                "bbd6b82893e75d17"
+            ]
+        ]
+    },
+    {
+        "id": "c9339c372dd7589f",
+        "type": "ui_group",
+        "name": "Dernière visite employé :",
+        "tab": "cce97331f75c10a4",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "5c31a528aa0b32d7",
+        "type": "group",
+        "z": "5a1ac741c92d4ba0",
+        "name": "Informations en temps réel",
+        "style": {
+            "stroke": "#001f60",
+            "fill": "#7fb7df",
+            "fill-opacity": "0.3",
+            "label": true,
+            "color": "#000000"
+        },
+        "nodes": [
+            "d9f7dcfd38457df7",
+            "0be40b16cefcdd0b",
+            "ccb7dd870005de59"
+        ],
+        "x": 114,
+        "y": 679,
+        "w": 552,
+        "h": 122
+    },
+    {
+        "id": "d9f7dcfd38457df7",
+        "type": "mqtt in",
+        "z": "5a1ac741c92d4ba0",
+        "g": "5c31a528aa0b32d7",
+        "name": "",
+        "topic": "esp32/maison/doorState",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "5719589c05b2e707",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 250,
+        "y": 740,
+        "wires": [
+            [
+                "0be40b16cefcdd0b",
+                "ccb7dd870005de59"
+            ]
+        ]
+    },
+    {
+        "id": "0be40b16cefcdd0b",
+        "type": "ui_text",
+        "z": "5a1ac741c92d4ba0",
+        "g": "5c31a528aa0b32d7",
+        "group": "25a4620d8864a509",
+        "order": 9,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "État de la porte :",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 560,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "ccb7dd870005de59",
+        "type": "ui_led",
+        "z": "5a1ac741c92d4ba0",
+        "g": "5c31a528aa0b32d7",
+        "order": 10,
+        "group": "25a4620d8864a509",
+        "width": 0,
+        "height": 0,
+        "label": "",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "Fermée",
+                "valueType": "str"
+            },
+            {
+                "color": "#008000",
+                "value": "Ouverte",
+                "valueType": "str"
+            },
+            {
+                "color": "#ffa500",
+                "value": "En fermeture",
+                "valueType": "str"
+            },
+            {
+                "color": "#ffa500",
+                "value": "En ouverture",
+                "valueType": "str"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "",
+        "x": 530,
+        "y": 760,
+        "wires": []
+    }
+]
