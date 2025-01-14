@@ -30,12 +30,15 @@
 // "Variables" globales
 const int relay = 32;
 const int buzzer = 13;
-const int ledRed = 33; //au lieu de 33
+const int ledRed = 33;
 const int stepsPerRevolution = 2038;
 int red = 255;
 int green = 255;
 int blue = 255;
 String lastMessageOLED = "";
+String lastStateDoor = "close";
+unsigned int freq_tone = 200;
+unsigned long time_tone = 200;
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins) = oled
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
@@ -97,7 +100,7 @@ void setup() {
   strip.begin();
   strip.show();
   strip.setBrightness(50);
-  colorWipe(strip.Color(green, red, blue), 1);  // Couleur blanche par défaut
+  colorWipe(strip.Color(green, red, blue), 10);  // Couleur blanche par défaut
 
 
   setup_wifi();
@@ -128,17 +131,18 @@ void loop() {
 
   UID.toUpperCase();
 
-  if (UID.substring(1) == "36 92 8B 44" || ((UID.substring(1) == "8B 7E BD 22" || UID.substring(1) == "BA FC A6 16" || UID.substring(1) == "39 77 91 6D") && codeSaisi == codeCorrectEmploye)) {
+  if (UID.substring(1) == "36 92 8B 44" || ((UID.substring(1) == "8B 7E BD 22" || UID.substring(1) == "BA FC A6 16" || 
+  UID.substring(1) == "39 77 91 6D") && codeSaisi == codeCorrectEmploye)) {
+
     sendData(2);
     affichageScan(1, "Employe\nreconnu");
     delay(2000);
     ouverture();
+
   } else if (UID.substring(1) == "8B 7E BD 22" || UID.substring(1) == "BA FC A6 16" || UID.substring(1) == "39 77 91 6D") {
     sendData(1);
     ouverture();
-  }
-
-  else {
+  }  else {
     affichageScan(2, "Badge non autorise");
     erreur();
   }
@@ -162,39 +166,49 @@ void ouverture() {
 
   //moteur
   Serial.println("Ouverture");
+  clientTHUNE.publish("esp32/maison/doorState", "En ouverture");
   myStepper.step(-stepsPerRevolution * 1.2);
+  clientTHUNE.publish("esp32/maison/doorState", "Ouverte");
   green = 255;
   red = 0;
   blue = 0;
   for (int i = 0 ; i < 5 ; i++) {
-  colorWipe(strip.Color(green, red, blue), 100);
-  green = 0;
-  red = 255;
-  colorWipe(strip.Color(green, red, blue), 100);
-  red = 0;
-  blue = 255;
-  colorWipe(strip.Color(green, red, blue), 100);
-  blue = 0;
-  green = 255;
-  colorWipe(strip.Color(green, red, blue), 100);
+    colorWipe(strip.Color(green, red, blue), 100);
+    green = 0;
+    red = 255;
+    colorWipe(strip.Color(green, red, blue), 100);
+    red = 0;
+    blue = 255;
+    colorWipe(strip.Color(green, red, blue), 100);
+    blue = 0;
+    green = 255;
+    colorWipe(strip.Color(green, red, blue), 100);
   }
+  blue = 255;
+  red = 255;
+  colorWipe(strip.Color(green, red, blue), 10);
+
 
   affichageScan(1, "Fermeture imminente");
 
-  for (int j = 0; j < 5; j++) {
+  for (int j = 0; j < 2; j++) {
     digitalWrite(ledRed, HIGH);
+    tone(buzzer, 250, 200);
     delay(500);
     digitalWrite(ledRed, LOW);
+    tone(buzzer, 250, 200);
     delay(500);
   }
 
   digitalWrite(relay, LOW);
-  tone(buzzer, 250, 200);
+  tone(buzzer, 250, 1500);
   affichageScan(1, "Fermeture");
 
   // 1 rotation counterclockwise:
   Serial.println("Fermeture");
+  clientTHUNE.publish("esp32/maison/doorState", "En fermeture");
   myStepper.step(stepsPerRevolution * 1.2);
+  clientTHUNE.publish("esp32/maison/doorState", "Fermée");
   delay(1000);
 
   colorWipe(strip.Color(255, 255, 255), 1);  // White
@@ -217,60 +231,12 @@ void erreur() {
     delay(500);
   }
 
-  digitalWrite(ledRed, HIGH);
-  delay(5000);
-  digitalWrite(ledRed, LOW);
+  tone(buzzer, 250, 200);
 
   affichageScan(0, "a");
-
-  Serial.println("ceci est un test dans l'erreur");
 }
 
 
-//RFID
-// TO DELETEEE
-/*
-void readRFID()
-{ 
-  
-  // Look for new card
-  if ( ! mfrc522.PICC_IsNewCardPresent()) 
-  return;
- 
-    // Verify if the NUID has been readed
-  if (  !mfrc522.PICC_ReadCardSerial())
-  return;
-  
-  if (mfrc522.uid.uidByte[0] != nuidPICC[0] || 
-    mfrc522.uid.uidByte[1] != nuidPICC[1] || 
-    mfrc522.uid.uidByte[2] != nuidPICC[2] || 
-    mfrc522.uid.uidByte[3] != nuidPICC[3] ) {
-    Serial.println(F("A new card has been detected."));
- 
-    // Store NUID into nuidPICC array
-    for (byte i = 0; i < 4; i++) {
-      nuidPICC[i] = mfrc522.uid.uidByte[i];
-    }
-    Serial.print(F("RFID tag in dec: "));
-    printDec(mfrc522.uid.uidByte, mfrc522.uid.size);
-    Serial.println();
-  }
-  // Halt PICC
-  mfrc522.PICC_HaltA();
- 
-  // Stop encryption on PCD
-  mfrc522.PCD_StopCrypto1();
-}
- 
- 
-
-void printDec(byte *buffer, byte bufferSize) {
-  for (byte i = 0; i < bufferSize; i++) {
-    Serial.print(buffer[i] < 0x10 ? " 0" : " ");
-    Serial.print(buffer[i], HEX);
-  }
-}
-*/
 // Affiche un message par défaut si x = FALSE
 void affichageScan(int x, String msg) {
 
@@ -430,7 +396,7 @@ void affichageCode() {
     display.setCursor(25, 30);
 
     for (int i = 0; i < codeSaisi.length(); i++) {
-
+      
       display.print("*");
     }
 
@@ -461,8 +427,10 @@ void rainbow(int wait) {
     colorWipe(strip.Color(green, red, blue), 100);
     blue = 0;
     green = 255;
-    colorWipe(strip.Color(green, red, blue), 100);
   }
+  red = 255;
+  blue = 255;
+  colorWipe(strip.Color(green, red, blue), 10);
 }
 
 
@@ -475,19 +443,15 @@ void colorWipe(uint32_t color, int wait) {
 }
 
 
-//------Cette fonction se connecte au réseau WiFi en utilisant les paramètres de connexion fournis
-//dans les variables ssid et password.
+
 void setup_wifi() {
-  delay(10);  // Cette instruction pause l'exécution du programme pendant 10 millisecondes.
-  // We start by connecting to a WiFi network
-  Serial.println();  // Imprime une ligne vide/saut de ligne dans la console série.
+  delay(10);
+  Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
 
-  WiFi.begin(ssid, password);  // //démarre la connexion Wi-Fi avec les informations de connexion (SSID et mot de passe) fournies.
+  WiFi.begin(ssid, password);
 
-  //Cette boucle effectue une pause de 500 millisecondes jusqu'à ce que l'ESP32 soit
-  //connecté au réseau Wi-Fi. Le statut de la connexion est obtenu en appelant "WiFi.status()".
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -503,11 +467,10 @@ void setup_wifi() {
 // Application des requêtes MQTT reçues via nodered
 void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
-  Serial.print(topic);  // imprime le nom du Topic sur lequel le message a été publié.
+  Serial.print(topic);
   Serial.println(". Message: ");
-  String messageTemp;  // déclare une variable de chaîne temporaire pour stocker le message reçu.
+  String messageTemp;
 
-  // boucle sur chaque élement dans le tableau de bytes "message" et les ajoute à la chaîne "messageTemp".
   for (int i = 0; i < length; i++) {
     Serial.print((char)message[i]);
     messageTemp += (char)message[i];
@@ -515,12 +478,18 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.println();
 
   if (String(topic) == "esp32/maison/door") {
-    if (messageTemp == "onDoor") {
+    if (messageTemp == "onDoor") {  
+    clientTHUNE.publish("esp32/maison/doorState", "En ouverture");
+      digitalWrite(relay, HIGH);  //serrure "éjecté"
       myStepper.step(-stepsPerRevolution * 1.2);  // Ouvrir la porte
+      digitalWrite(relay, LOW); 
+      clientTHUNE.publish("esp32/maison/doorState", "Ouverte");
       Serial.println("Porte ouverte !");
     } else if (messageTemp == "offDoor") {
+      clientTHUNE.publish("esp32/maison/doorState", "En fermeture");
       myStepper.step(stepsPerRevolution * 1.2);  // Fermer la porte
-      Serial.println("Porte fermée !");
+      clientTHUNE.publish("esp32/maison/doorState", "Fermée");
+      Serial.println("Porte fermee !");
     } else {
       Serial.println("Problème messageTemp pour Moteur");
     }
@@ -537,16 +506,14 @@ void callback(char* topic, byte* message, unsigned int length) {
     }
   }
 
+  if (String(topic) == "esp32/maison/buzzerHz") {
+    freq_tone = (unsigned int)messageTemp.toInt();
+    tone(buzzer, freq_tone, time_tone);
+  }
 
-
-  if (String(topic) == "esp32/maison/buzzer") {
-    if (messageTemp == "1") {
-      playJingleBells();
-    } else if (messageTemp == "2") {
-      playBackInBlack();
-    } else {
-      Serial.println("Problème messageTemp pour buzzer");
-    }
+  if (String(topic) == "esp32/maison/buzzerTime") {
+    time_tone = (unsigned long)messageTemp.toInt();
+    tone(buzzer, freq_tone, time_tone);
   }
 
   if (String(topic) == "esp32/maison/ledStickRed") {
@@ -566,7 +533,6 @@ void callback(char* topic, byte* message, unsigned int length) {
 
   if (String(topic) == "esp32/maison/ledStickRainbow") {
     rainbow(10);
-    Serial.println("Rainbowwww");
   }
 
   if (String(topic) == "esp32/maison/ecran2") {
@@ -596,7 +562,8 @@ void reconnect() {
       Serial.println("connected");
       // Subscribe
       clientTHUNE.subscribe("esp32/maison/ledRed");
-      clientTHUNE.subscribe("esp32/maison/buzzer");
+      clientTHUNE.subscribe("esp32/maison/buzzerHz");
+      clientTHUNE.subscribe("esp32/maison/buzzerTime");
       clientTHUNE.subscribe("esp32/maison/door");
       clientTHUNE.subscribe("esp32/maison/ledStickRed");
       clientTHUNE.subscribe("esp32/maison/ledStickBlue");
@@ -614,28 +581,17 @@ void reconnect() {
 }
 
 
-
-
-
-
 int lastLedState = 0;
 
 
-// Met à jour les valeurs sur le nodered
 void checkingData() {
-  // La première tâche de la fonction principale est de vérifier si le client MQTT est connecté.
-  //Si ce n'est pas le cas, la fonction reconnect() est appelée pour reconnecter le client.
   if (!clientTHUNE.connected()) {
     reconnect();
   }
-
-  clientTHUNE.loop();  // La méthode client.loop() est appelée pour traiter les messages MQTT entrants.
-    // Maintient la connexion avec le serveur MQTT en vérifiant si de nouveaux messages sont arrivés et en envoyant les messages en attente.
-
-  //La dernière partie vérifie le temps écoulé depuis le dernier message publié et n'envoie le prochain message que toutes les 2 secondes (2000 millisecondes).
-  long now = millis();        // Crée une variable "now" pour stocker le nombre de millisecondes écoulées depuis le démarrage du programme.
-  if (now - lastMsg > 500) {  // Vérifie si le temps écoulé depuis le dernier message publié est supérieur à 2000 millisecondes.
-    lastMsg = now;            // Si oui, met à jour la variable "lastMsg" avec la valeur actuelle de "now".
+  clientTHUNE.loop();
+  long now = millis();
+  if (now - lastMsg > 500) {
+    lastMsg = now;
 
     int ledRedState = digitalRead(ledRed);
 
@@ -649,6 +605,14 @@ void checkingData() {
       }
       lastLedState = ledRedState;
     }
+
+    if (lastStateDoor == "open") {
+      clientTHUNE.publish("esp32/maison/doorState", "Ouverte");
+      lastStateDoor = "null";
+    } else if (lastStateDoor == "close") {
+      clientTHUNE.publish("esp32/maison/doorState", "Fermée");
+      lastStateDoor = "null";
+    }
   }
 }
 
@@ -661,7 +625,7 @@ void sendData(int identifiant) {
     clientTHUNE.publish("esp32/maison/ouverture", "1");
   } else if (identifiant == 2) {
     Serial.println("Données envoyés OPEN");
-    clientTHUNE.publish("esp32/maison/ouverture", "1");
+    clientTHUNE.publish("esp32/maison/ouverture", "2");
   } else if (identifiant == 0) {
     clientTHUNE.publish("esp32/maison/erreur", "null");
     Serial.println("Données envoyés ERREUR");
